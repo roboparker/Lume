@@ -115,6 +115,8 @@
       <path value="$PROJECT_DIR$/api/vendor/symfony/var-dumper" />
       <path value="$PROJECT_DIR$/api/vendor/symfony/http-foundation" />
       <path value="$PROJECT_DIR$/api/vendor/bin/.phpunit" />
+      <path value="$PROJECT_DIR$/api/vendor/symfony/polyfill-uuid" />
+      <path value="$PROJECT_DIR$/api/vendor/symfony/uid" />
     </include_path>
   </component>
   <component name="PhpInterpreters">
