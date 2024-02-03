@@ -6,7 +6,7 @@ use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 
 class NoteCardTest extends ApiTestCase
 {
-    public function testCreateGreeting(): void
+    public function testCreateNoteCard(): void
     {
         static::createClient()->request('POST', '/note_cards', [
             'json' => [
