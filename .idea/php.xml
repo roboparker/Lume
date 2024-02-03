@@ -117,6 +117,10 @@
       <path value="$PROJECT_DIR$/api/vendor/bin/.phpunit" />
       <path value="$PROJECT_DIR$/api/vendor/symfony/polyfill-uuid" />
       <path value="$PROJECT_DIR$/api/vendor/symfony/uid" />
+      <path value="$PROJECT_DIR$/api/vendor/fakerphp/faker" />
+      <path value="$PROJECT_DIR$/api/vendor/zenstruck/foundry" />
+      <path value="$PROJECT_DIR$/api/vendor/zenstruck/callback" />
+      <path value="$PROJECT_DIR$/api/vendor/zenstruck/assert" />
     </include_path>
   </component>
   <component name="PhpInterpreters">
@@ -200,6 +204,7 @@
   <component name="PhpUnit">
     <phpunit_settings>
       <phpunit_by_interpreter interpreter_id="0846f050-7963-45b6-a2b0-bfe8ddbf503a" load_method="PHPUNIT_PHAR" bootstrap_file_path="/app/tests/bootstrap.php" configuration_file_path="/app/phpunit.xml.dist" custom_loader_path="/app/vendor/autoload.php" phpunit_phar_path="/app/bin/phpunit" use_bootstrap_file="true" use_configuration_file="true" />
+      <PhpUnitSettings configuration_file_path="$PROJECT_DIR$/api/phpunit.xml.dist" custom_loader_path="$PROJECT_DIR$/api/vendor/autoload.php" use_configuration_file="true" />
     </phpunit_settings>
   </component>
   <component name="PsalmOptionsConfiguration">
