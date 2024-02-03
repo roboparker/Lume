@@ -76,6 +76,32 @@ class NoteCardTest extends ApiTestCase
         ]);
     }
 
+    public function testUpdateNoteCardPartially(): void
+    {
+        $noteCard = NoteCardFactory::new()->create();
+        $previousBackValue = $noteCard->getBack();
+        $updatedFrontValue = 'Question';
+
+        $this->assertFalse($noteCard->getFront() === $updatedFrontValue);
+
+        static::createClient()->request('PATCH', '/note_cards/' . $noteCard->getId(), [
+            'json' => [
+                'front' => $updatedFrontValue,
+            ],
+            'headers' => [
+                'Content-Type' => 'application/merge-patch+json',
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJsonContains([
+            '@context' => '/contexts/NoteCard',
+            '@type' => 'NoteCard',
+            'front' => $updatedFrontValue,
+            'back' => $previousBackValue,
+        ]);
+    }
+
     public function testDeleteNoteCard(): void
     {
         $noteCard = NoteCardFactory::new()->create();
