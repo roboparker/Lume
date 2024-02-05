@@ -32,6 +32,7 @@
     },
     "require-dev": {
         "api-platform/schema-generator": "^5.0",
+        "friendsofphp/php-cs-fixer": "^3.49",
         "symfony/browser-kit": "6.4.*",
         "symfony/css-selector": "6.4.*",
         "symfony/debug-bundle": "6.4.*",
@@ -85,7 +86,8 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "php-cs-fixer": "php-cs-fixer --rules=@Symfony"
     },
     "conflict": {
         "symfony/symfony": "*"

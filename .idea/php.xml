@@ -10,6 +10,12 @@
     <option name="highlightLevel" value="WARNING" />
     <option name="transferred" value="true" />
   </component>
+  <component name="PhpCSFixer">
+    <phpcsfixer_settings>
+      <PhpCSFixerConfiguration tool_path="$PROJECT_DIR$/api/vendor/bin/php-cs-fixer" />
+      <phpcs_fixer_by_interpreter interpreter_id="0846f050-7963-45b6-a2b0-bfe8ddbf503a" standards="PSR1;PSR2;Symfony;DoctrineAnnotation;PHP70Migration;PHP71Migration" tool_path="\\wsl.localhost\Ubuntu\home\roboparker\Lume\api\vendor\bin\php-cs-fixer" timeout="30000" />
+    </phpcsfixer_settings>
+  </component>
   <component name="PhpIncludePathManager">
     <include_path>
       <path value="$PROJECT_DIR$/api/vendor/symfony/framework-bundle" />
