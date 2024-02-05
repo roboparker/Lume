@@ -71,3 +71,6 @@ jobs:
         uses: hadolint/hadolint-action@v3.1.0
         with:
           recursive: true
+      -
+        name: Run CS Fixer checks
+        run: docker compose exec -T php php vendor/bin/php-cs-fixer fix --dry-run --diff
