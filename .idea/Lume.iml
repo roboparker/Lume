@@ -115,6 +115,7 @@
       <excludeFolder url="file://$MODULE_DIR$/api/vendor/zenstruck/assert" />
       <excludeFolder url="file://$MODULE_DIR$/api/vendor/zenstruck/callback" />
       <excludeFolder url="file://$MODULE_DIR$/api/vendor/zenstruck/foundry" />
+      <excludeFolder url="file://$MODULE_DIR$/api/vendor/dama/doctrine-test-bundle" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

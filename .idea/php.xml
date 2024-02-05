@@ -127,6 +127,7 @@
       <path value="$PROJECT_DIR$/api/vendor/zenstruck/foundry" />
       <path value="$PROJECT_DIR$/api/vendor/zenstruck/callback" />
       <path value="$PROJECT_DIR$/api/vendor/zenstruck/assert" />
+      <path value="$PROJECT_DIR$/api/vendor/dama/doctrine-test-bundle" />
     </include_path>
   </component>
   <component name="PhpInterpreters">
