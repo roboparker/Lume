@@ -37,7 +37,7 @@ class NoteCardTest extends ApiTestCase
     {
         $noteCard = NoteCardFactory::new()->create();
 
-        static::createClient()->request('GET', '/note_cards/' . $noteCard->getId());
+        static::createClient()->request('GET', '/note_cards/'.$noteCard->getId());
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
@@ -57,7 +57,7 @@ class NoteCardTest extends ApiTestCase
         $this->assertFalse($noteCard->getFront() === $updatedFrontValue);
         $this->assertFalse($noteCard->getBack() === $updatedBackValue);
 
-        static::createClient()->request('PUT', '/note_cards/' . $noteCard->getId(), [
+        static::createClient()->request('PUT', '/note_cards/'.$noteCard->getId(), [
             'json' => [
                 'front' => $updatedFrontValue,
                 'back' => $updatedBackValue,
@@ -84,7 +84,7 @@ class NoteCardTest extends ApiTestCase
 
         $this->assertFalse($noteCard->getFront() === $updatedFrontValue);
 
-        static::createClient()->request('PATCH', '/note_cards/' . $noteCard->getId(), [
+        static::createClient()->request('PATCH', '/note_cards/'.$noteCard->getId(), [
             'json' => [
                 'front' => $updatedFrontValue,
             ],
@@ -107,11 +107,11 @@ class NoteCardTest extends ApiTestCase
         $noteCard = NoteCardFactory::new()->create();
         $id = $noteCard->getId();
 
-        static::createClient()->request('DELETE', '/note_cards/' . $id);
+        static::createClient()->request('DELETE', '/note_cards/'.$id);
 
         $this->assertResponseStatusCodeSame(204);
 
-        static::createClient()->request('GET', '/note_cards/' . $id);
+        static::createClient()->request('GET', '/note_cards/'.$id);
 
         $this->assertResponseStatusCodeSame(404);
     }

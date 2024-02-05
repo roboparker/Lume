@@ -17,7 +17,7 @@ class NoteCard
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    private ?UUID $id = null;
+    private ?Uuid $id = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $front = null;
@@ -25,7 +25,7 @@ class NoteCard
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $back = null;
 
-    public function getId(): ?UUID
+    public function getId(): ?Uuid
     {
         return $this->id;
     }
