@@ -128,6 +128,9 @@
       <path value="$PROJECT_DIR$/api/vendor/zenstruck/callback" />
       <path value="$PROJECT_DIR$/api/vendor/zenstruck/assert" />
       <path value="$PROJECT_DIR$/api/vendor/dama/doctrine-test-bundle" />
+      <path value="$PROJECT_DIR$/api/vendor/namshi/jose" />
+      <path value="$PROJECT_DIR$/api/vendor/lcobucci/clock" />
+      <path value="$PROJECT_DIR$/api/vendor/lexik/jwt-authentication-bundle" />
     </include_path>
   </component>
   <component name="PhpInterpreters">

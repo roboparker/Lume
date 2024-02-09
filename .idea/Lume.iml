@@ -116,6 +116,9 @@
       <excludeFolder url="file://$MODULE_DIR$/api/vendor/zenstruck/callback" />
       <excludeFolder url="file://$MODULE_DIR$/api/vendor/zenstruck/foundry" />
       <excludeFolder url="file://$MODULE_DIR$/api/vendor/dama/doctrine-test-bundle" />
+      <excludeFolder url="file://$MODULE_DIR$/api/vendor/lcobucci/clock" />
+      <excludeFolder url="file://$MODULE_DIR$/api/vendor/lexik/jwt-authentication-bundle" />
+      <excludeFolder url="file://$MODULE_DIR$/api/vendor/namshi/jose" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
