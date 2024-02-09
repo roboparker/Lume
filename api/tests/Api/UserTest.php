@@ -107,4 +107,11 @@ class UserTest extends ApiTestCase
 
         $this->assertResponseStatusCodeSame(204);
     }
+
+    public function testNotFound(): void
+    {
+        static::createClient()->request('GET', '/users/1');
+
+        $this->assertResponseStatusCodeSame(404);
+    }
 }

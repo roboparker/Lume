@@ -118,4 +118,11 @@ class NoteCardTest extends ApiTestCase
 
         $this->assertResponseStatusCodeSame(404);
     }
+
+    public function testNotFoundNoteCard(): void
+    {
+        static::createClient()->request('GET', '/note_cards/1');
+
+        $this->assertResponseStatusCodeSame(404);
+    }
 }
