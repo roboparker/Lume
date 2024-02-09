@@ -3,6 +3,7 @@
 namespace App\Tests\Entity;
 
 use App\Entity\User;
+use Faker\Factory;
 use PHPUnit\Framework\TestCase;
 
 class UserTest extends TestCase
@@ -16,7 +17,7 @@ class UserTest extends TestCase
     public function testGetEmail(): void
     {
         $user = new User();
-        $email = 'lume@test.com';
+        $email = Factory::create()->email();
         $user->setEmail($email);
         $this->assertSame($email, $user->getEmail());
     }
@@ -24,7 +25,7 @@ class UserTest extends TestCase
     public function testGetPassword(): void
     {
         $user = new User();
-        $password = 'password';
+        $password = Factory::create()->password();
         $user->setPassword($password);
         $this->assertSame($password, $user->getPassword());
     }
@@ -32,7 +33,7 @@ class UserTest extends TestCase
     public function testGetPlainPassword(): void
     {
         $user = new User();
-        $plainPassword = 'password';
+        $plainPassword = Factory::create()->password();
         $user->setPlainPassword($plainPassword);
         $this->assertSame($plainPassword, $user->getPlainPassword());
     }
@@ -48,7 +49,7 @@ class UserTest extends TestCase
     public function testGetUserIdentifier(): void
     {
         $user = new User();
-        $email = 'lume@test.com';
+        $email = Factory::create()->email();
         $user->setEmail($email);
         $this->assertSame($email, $user->getUserIdentifier());
     }
@@ -56,7 +57,7 @@ class UserTest extends TestCase
     public function testEraseCredentials(): void
     {
         $user = new User();
-        $plainPassword = 'password';
+        $plainPassword = Factory::create()->password();
         $user->setPlainPassword($plainPassword);
         $user->eraseCredentials();
         $this->assertNull($user->getPlainPassword());

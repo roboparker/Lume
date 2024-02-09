@@ -15,10 +15,12 @@ class UserTest extends ApiTestCase
 
     public function testCreateUser(): void
     {
+        $email = Factory::create()->email();
+
         static::createClient()->request('POST', '/users', [
             'json' => [
-                'email' => 'user@test.com',
-                'plainPassword' => 'password',
+                'email' => $email,
+                'plainPassword' => Factory::create()->password(),
             ],
             'headers' => [
                 'Content-Type' => 'application/ld+json',
@@ -29,7 +31,7 @@ class UserTest extends ApiTestCase
         $this->assertJsonContains([
             '@context' => '/contexts/User',
             '@type' => 'User',
-            'email' => 'user@test.com',
+            'email' => $email,
         ]);
     }
 

@@ -3,6 +3,7 @@
 namespace App\Tests\Entity;
 
 use App\Entity\NoteCard;
+use Faker\Factory;
 use PHPUnit\Framework\TestCase;
 
 final class NoteCardTest extends TestCase
@@ -16,14 +17,16 @@ final class NoteCardTest extends TestCase
     public function testGetFront(): void
     {
         $noteCard = new NoteCard();
-        $noteCard->setFront('Question');
-        $this->assertSame('Question', $noteCard->getFront());
+        $front = Factory::create()->sentence();
+        $noteCard->setFront($front);
+        $this->assertSame($front, $noteCard->getFront());
     }
 
     public function testGetBack(): void
     {
         $noteCard = new NoteCard();
-        $noteCard->setBack('Answer');
-        $this->assertSame('Answer', $noteCard->getBack());
+        $back = Factory::create()->sentence();
+        $noteCard->setBack($back);
+        $this->assertSame($back, $noteCard->getBack());
     }
 }

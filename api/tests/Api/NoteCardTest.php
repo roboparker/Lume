@@ -4,6 +4,7 @@ namespace App\Tests\Api;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Factory\NoteCardFactory;
+use Faker\Factory;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
@@ -14,10 +15,12 @@ class NoteCardTest extends ApiTestCase
 
     public function testCreateNoteCard(): void
     {
+        $front = Factory::create()->sentence();
+        $back = Factory::create()->sentence();
         static::createClient()->request('POST', '/note_cards', [
             'json' => [
-                'front' => 'Question',
-                'back' => 'Answer',
+                'front' => $front,
+                'back' => $back,
             ],
             'headers' => [
                 'Content-Type' => 'application/ld+json',
@@ -28,8 +31,8 @@ class NoteCardTest extends ApiTestCase
         $this->assertJsonContains([
             '@context' => '/contexts/NoteCard',
             '@type' => 'NoteCard',
-            'front' => 'Question',
-            'back' => 'Answer',
+            'front' => $front,
+            'back' => $back,
         ]);
     }
 
@@ -51,8 +54,8 @@ class NoteCardTest extends ApiTestCase
     public function testUpdateNoteCard(): void
     {
         $noteCard = NoteCardFactory::new()->create();
-        $updatedFrontValue = 'Question';
-        $updatedBackValue = 'Answer';
+        $updatedFrontValue = Factory::create()->sentence();
+        $updatedBackValue = Factory::create()->sentence();
 
         $this->assertFalse($noteCard->getFront() === $updatedFrontValue);
         $this->assertFalse($noteCard->getBack() === $updatedBackValue);
@@ -80,7 +83,7 @@ class NoteCardTest extends ApiTestCase
     {
         $noteCard = NoteCardFactory::new()->create();
         $previousBackValue = $noteCard->getBack();
-        $updatedFrontValue = 'Question';
+        $updatedFrontValue = Factory::create()->sentence();
 
         $this->assertFalse($noteCard->getFront() === $updatedFrontValue);
 
