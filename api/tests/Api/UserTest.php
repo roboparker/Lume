@@ -17,7 +17,10 @@ class UserTest extends ApiTestCase
     {
         $email = Factory::create()->email();
 
-        static::createClient()->request('POST', '/users', [
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('POST', '/users', [
             'json' => [
                 'email' => $email,
                 'plainPassword' => Factory::create()->password(),
@@ -39,7 +42,10 @@ class UserTest extends ApiTestCase
     {
         $user = UserFactory::new()->create();
 
-        static::createClient()->request('GET', '/users/'.$user->getId());
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('GET', '/users/'.$user->getId());
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
@@ -57,7 +63,10 @@ class UserTest extends ApiTestCase
 
         $this->assertFalse($user->getEmail() === $updatedEmail);
 
-        static::createClient()->request('PUT', '/users/'.$user->getId(), [
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('PUT', '/users/'.$user->getId(), [
             'json' => [
                 'email' => $updatedEmail,
                 'plainPassword' => $updatedPassword,
@@ -82,7 +91,10 @@ class UserTest extends ApiTestCase
 
         $this->assertFalse($user->getEmail() === $updatedEmail);
 
-        static::createClient()->request('PATCH', '/users/'.$user->getId(), [
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('PATCH', '/users/'.$user->getId(), [
             'json' => [
                 'email' => $updatedEmail,
             ],
@@ -103,14 +115,20 @@ class UserTest extends ApiTestCase
     {
         $user = UserFactory::new()->create();
 
-        static::createClient()->request('DELETE', '/users/'.$user->getId());
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('DELETE', '/users/'.$user->getId());
 
         $this->assertResponseStatusCodeSame(204);
     }
 
     public function testNotFound(): void
     {
-        static::createClient()->request('GET', '/users/1');
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('GET', '/users/1');
 
         $this->assertResponseStatusCodeSame(404);
     }

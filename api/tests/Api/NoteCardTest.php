@@ -4,6 +4,7 @@ namespace App\Tests\Api;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Factory\NoteCardFactory;
+use App\Factory\UserFactory;
 use Faker\Factory;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
@@ -17,7 +18,10 @@ class NoteCardTest extends ApiTestCase
     {
         $front = Factory::create()->sentence();
         $back = Factory::create()->sentence();
-        static::createClient()->request('POST', '/note_cards', [
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('POST', '/note_cards', [
             'json' => [
                 'front' => $front,
                 'back' => $back,
@@ -39,8 +43,10 @@ class NoteCardTest extends ApiTestCase
     public function testReadNoteCard(): void
     {
         $noteCard = NoteCardFactory::new()->create();
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
 
-        static::createClient()->request('GET', '/note_cards/'.$noteCard->getId());
+        $client->request('GET', '/note_cards/'.$noteCard->getId());
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
@@ -60,7 +66,10 @@ class NoteCardTest extends ApiTestCase
         $this->assertFalse($noteCard->getFront() === $updatedFrontValue);
         $this->assertFalse($noteCard->getBack() === $updatedBackValue);
 
-        static::createClient()->request('PUT', '/note_cards/'.$noteCard->getId(), [
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('PUT', '/note_cards/'.$noteCard->getId(), [
             'json' => [
                 'front' => $updatedFrontValue,
                 'back' => $updatedBackValue,
@@ -87,7 +96,10 @@ class NoteCardTest extends ApiTestCase
 
         $this->assertFalse($noteCard->getFront() === $updatedFrontValue);
 
-        static::createClient()->request('PATCH', '/note_cards/'.$noteCard->getId(), [
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('PATCH', '/note_cards/'.$noteCard->getId(), [
             'json' => [
                 'front' => $updatedFrontValue,
             ],
@@ -110,18 +122,27 @@ class NoteCardTest extends ApiTestCase
         $noteCard = NoteCardFactory::new()->create();
         $id = $noteCard->getId();
 
-        static::createClient()->request('DELETE', '/note_cards/'.$id);
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('DELETE', '/note_cards/'.$id);
 
         $this->assertResponseStatusCodeSame(204);
 
-        static::createClient()->request('GET', '/note_cards/'.$id);
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('GET', '/note_cards/'.$id);
 
         $this->assertResponseStatusCodeSame(404);
     }
 
     public function testNotFoundNoteCard(): void
     {
-        static::createClient()->request('GET', '/note_cards/1');
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('GET', '/note_cards/1');
 
         $this->assertResponseStatusCodeSame(404);
     }
