@@ -34,7 +34,7 @@ final class UserFactory extends ModelFactory
      * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services
      */
     public function __construct(
-        private UserPasswordHasherInterface  $passwordHasher,
+        private UserPasswordHasherInterface $passwordHasher,
     ) {
         parent::__construct();
     }
