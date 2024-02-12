@@ -5,6 +5,9 @@ api_platform:
     mercure: ~
     formats:
         jsonld: ['application/ld+json']
+        json: ['application/json']
+        html: ['text/html']
+        csv: ['text/csv']
     docs_formats:
         jsonld: ['application/ld+json']
         jsonopenapi: ['application/vnd.openapi+json']
