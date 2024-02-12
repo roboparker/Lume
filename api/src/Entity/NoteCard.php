@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Serializer\Filter\PropertyFilter;
 use App\Entity\Trait\IsPublishedTrait;
 use App\Repository\NoteCardRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -16,6 +17,7 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: NoteCardRepository::class)]
 #[ApiResource]
+#[ApiFilter(PropertyFilter::class)]
 class NoteCard
 {
     use IsPublishedTrait;

@@ -221,4 +221,32 @@ class NoteCardTest extends ApiTestCase
             'hydra:totalItems' => 1,
         ]);
     }
+
+    public function testPropertyFilter(): void
+    {
+        $front = Factory::create()->text(255);
+        $back = Factory::create()->text();
+        NoteCardFactory::new()->create(['front' => $front, 'back' => $back]);
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('GET', '/note_cards', [
+            'query' => [
+                'properties' => ['front']
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJsonContains([
+            '@context' => '/contexts/NoteCard',
+            '@type' => 'hydra:Collection',
+            'hydra:totalItems' => 1,
+            'hydra:member' => [
+                [
+                    'front' => $front,
+                ],
+            ],
+        ]);
+        $this->assertArrayNotHasKey('back', $client->getResponse()->toArray(false));
+    }
 }

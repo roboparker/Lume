@@ -190,4 +190,35 @@ final class DeckTest extends ApiTestCase
             'hydra:totalItems' => 1,
         ]);
     }
+
+    public function testPropertiesFilter(): void
+    {
+        $title = Factory::create()->text(255);
+        $description = Factory::create()->text();
+        $isPublished = true;
+        DeckFactory::new()->create([
+            'title' => $title,
+            'description' => $description,
+            'isPublished' => $isPublished,
+        ]);
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('GET', '/decks', [
+            'query' => [
+                'properties' => ['title'],
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJsonContains([
+            '@context' => '/contexts/Deck',
+            '@id' => '/decks',
+            '@type' => 'hydra:Collection',
+            'hydra:totalItems' => 1,
+        ]);
+
+
+        $this->assertArrayNotHasKey('title', $client->getResponse()->toArray(false));
+    }
 }
