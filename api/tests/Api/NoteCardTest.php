@@ -18,6 +18,7 @@ class NoteCardTest extends ApiTestCase
     {
         $front = Factory::create()->sentence();
         $back = Factory::create()->sentence();
+        $isPublished = true;
         $client = static::createClient();
         $client->loginUser(UserFactory::new()->create()->object());
 
@@ -25,6 +26,7 @@ class NoteCardTest extends ApiTestCase
             'json' => [
                 'front' => $front,
                 'back' => $back,
+                'isPublished' => $isPublished,
             ],
             'headers' => [
                 'Content-Type' => 'application/ld+json',
@@ -37,6 +39,7 @@ class NoteCardTest extends ApiTestCase
             '@type' => 'NoteCard',
             'front' => $front,
             'back' => $back,
+            'isPublished' => $isPublished,
         ]);
     }
 
@@ -54,6 +57,7 @@ class NoteCardTest extends ApiTestCase
             '@type' => 'NoteCard',
             'front' => $noteCard->getFront(),
             'back' => $noteCard->getBack(),
+            'isPublished' => $noteCard->getIsPublished(),
         ]);
     }
 
@@ -62,9 +66,11 @@ class NoteCardTest extends ApiTestCase
         $noteCard = NoteCardFactory::new()->create();
         $updatedFrontValue = Factory::create()->sentence();
         $updatedBackValue = Factory::create()->sentence();
+        $updatedIsPublished = !$noteCard->getIsPublished();
 
         $this->assertFalse($noteCard->getFront() === $updatedFrontValue);
         $this->assertFalse($noteCard->getBack() === $updatedBackValue);
+        $this->assertFalse($noteCard->getIsPublished() === $updatedIsPublished);
 
         $client = static::createClient();
         $client->loginUser(UserFactory::new()->create()->object());
@@ -73,6 +79,7 @@ class NoteCardTest extends ApiTestCase
             'json' => [
                 'front' => $updatedFrontValue,
                 'back' => $updatedBackValue,
+                'isPublished' => $updatedIsPublished,
             ],
             'headers' => [
                 'Content-Type' => 'application/ld+json',
@@ -85,12 +92,14 @@ class NoteCardTest extends ApiTestCase
             '@type' => 'NoteCard',
             'front' => $updatedFrontValue,
             'back' => $updatedBackValue,
+            'isPublished' => $updatedIsPublished,
         ]);
     }
 
     public function testUpdateNoteCardPartially(): void
     {
         $noteCard = NoteCardFactory::new()->create();
+        $previousIsPublished = $noteCard->getIsPublished();
         $previousBackValue = $noteCard->getBack();
         $updatedFrontValue = Factory::create()->sentence();
 
@@ -114,6 +123,7 @@ class NoteCardTest extends ApiTestCase
             '@type' => 'NoteCard',
             'front' => $updatedFrontValue,
             'back' => $previousBackValue,
+            'isPublished' => $previousIsPublished,
         ]);
     }
 
@@ -145,5 +155,26 @@ class NoteCardTest extends ApiTestCase
         $client->request('GET', '/note_cards/1');
 
         $this->assertResponseStatusCodeSame(404);
+    }
+
+    public function testIsPublishedFilter(): void
+    {
+        NoteCardFactory::new()->create(['isPublished' => true]);
+        NoteCardFactory::new()->create(['isPublished' => false]);
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('GET', '/note_cards', [
+            'query' => [
+                'isPublished' => true,
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJsonContains([
+            '@context' => '/contexts/NoteCard',
+            '@type' => 'hydra:Collection',
+            'hydra:totalItems' => 1,
+        ]);
     }
 }

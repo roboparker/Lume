@@ -49,6 +49,7 @@ final class NoteCardFactory extends ModelFactory
         return [
             'front' => self::faker()->text(),
             'back' => self::faker()->text(),
+            'isPublished' => self::faker()->boolean(),
         ];
     }
 

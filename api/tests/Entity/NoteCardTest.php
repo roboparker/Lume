@@ -15,6 +15,13 @@ final class NoteCardTest extends TestCase
         $this->assertNull($noteCard->getId());
     }
 
+    public function testGetIsPublished(): void
+    {
+        $noteCard = new NoteCard();
+        $noteCard->setIsPublished(true);
+        $this->assertTrue($noteCard->getIsPublished());
+    }
+
     public function testGetFront(): void
     {
         $noteCard = new NoteCard();

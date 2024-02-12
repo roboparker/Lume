@@ -45,6 +45,7 @@ final class DeckFactory extends ModelFactory
         return [
             'title' => self::faker()->text(255),
             'description' => self::faker()->text(),
+            'isPublished' => self::faker()->boolean(),
         ];
     }
 

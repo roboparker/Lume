@@ -18,6 +18,7 @@ final class DeckTest extends ApiTestCase
     {
         $title = Factory::create()->text(255);
         $description = Factory::create()->text();
+        $isPublished = true;
         $client = static::createClient();
         $client->loginUser(UserFactory::new()->create()->object());
 
@@ -25,6 +26,7 @@ final class DeckTest extends ApiTestCase
             'json' => [
                 'title' => $title,
                 'description' => $description,
+                'isPublished' => $isPublished,
             ],
             'headers' => [
                 'Content-Type' => 'application/ld+json',
@@ -37,6 +39,7 @@ final class DeckTest extends ApiTestCase
             '@type' => 'Deck',
             'title' => $title,
             'description' => $description,
+            'isPublished' => $isPublished,
         ]);
     }
 
@@ -54,6 +57,7 @@ final class DeckTest extends ApiTestCase
             '@type' => 'Deck',
             'title' => $deck->getTitle(),
             'description' => $deck->getDescription(),
+            'isPublished' => $deck->getIsPublished(),
         ]);
     }
 
@@ -67,6 +71,7 @@ final class DeckTest extends ApiTestCase
             'json' => [
                 'title' => $title = Factory::create()->text(255),
                 'description' => $description = Factory::create()->text(),
+                'isPublished' => $isPublished = !$deck->getIsPublished(),
             ],
             'headers' => [
                 'Content-Type' => 'application/ld+json',
@@ -79,6 +84,7 @@ final class DeckTest extends ApiTestCase
             '@type' => 'Deck',
             'title' => $title,
             'description' => $description,
+            'isPublished' => $isPublished,
         ]);
     }
 
@@ -115,5 +121,27 @@ final class DeckTest extends ApiTestCase
         $client->request('DELETE', '/decks/'.$deck->getId());
 
         $this->assertResponseStatusCodeSame(204);
+    }
+
+    public function testIsPublishedFilter(): void
+    {
+        DeckFactory::new()->create(['isPublished' => true]);
+        DeckFactory::new()->create(['isPublished' => false]);
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('GET', '/decks', [
+            'query' => [
+                'isPublished' => true,
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJsonContains([
+            '@context' => '/contexts/Deck',
+            '@id' => '/decks',
+            '@type' => 'hydra:Collection',
+            'hydra:totalItems' => 1,
+        ]);
     }
 }

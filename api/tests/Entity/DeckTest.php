@@ -15,6 +15,13 @@ final class DeckTest extends TestCase
         $this->assertNull($deck->getId());
     }
 
+    public function testGetIsPublished()
+    {
+        $deck = new Deck();
+        $deck->setIsPublished(true);
+        $this->assertTrue($deck->getIsPublished());
+    }
+
     public function testGetTitle()
     {
         $deck = new Deck();
