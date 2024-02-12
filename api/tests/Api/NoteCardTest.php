@@ -177,4 +177,48 @@ class NoteCardTest extends ApiTestCase
             'hydra:totalItems' => 1,
         ]);
     }
+
+    public function testFrontFilter(): void
+    {
+        $front = Factory::create()->text(255);
+        NoteCardFactory::new()->create(['front' => $front]);
+        NoteCardFactory::new()->create(['front' => Factory::create()->text(255)]);
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('GET', '/note_cards', [
+            'query' => [
+                'front' => $front,
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJsonContains([
+            '@context' => '/contexts/NoteCard',
+            '@type' => 'hydra:Collection',
+            'hydra:totalItems' => 1,
+        ]);
+    }
+
+    public function testBackFilter(): void
+    {
+        $back = Factory::create()->text();
+        NoteCardFactory::new()->create(['back' => $back]);
+        NoteCardFactory::new()->create(['back' => Factory::create()->text()]);
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('GET', '/note_cards', [
+            'query' => [
+                'back' => $back,
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJsonContains([
+            '@context' => '/contexts/NoteCard',
+            '@type' => 'hydra:Collection',
+            'hydra:totalItems' => 1,
+        ]);
+    }
 }

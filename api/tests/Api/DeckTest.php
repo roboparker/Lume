@@ -144,4 +144,50 @@ final class DeckTest extends ApiTestCase
             'hydra:totalItems' => 1,
         ]);
     }
+
+    public function testTitleFilter(): void
+    {
+        $title = Factory::create()->text(255);
+        DeckFactory::new()->create(['title' => $title]);
+        DeckFactory::new()->create(['title' => Factory::create()->text(255)]);
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('GET', '/decks', [
+            'query' => [
+                'title' => $title,
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJsonContains([
+            '@context' => '/contexts/Deck',
+            '@id' => '/decks',
+            '@type' => 'hydra:Collection',
+            'hydra:totalItems' => 1,
+        ]);
+    }
+
+    public function testDescriptionFilter(): void
+    {
+        $description = Factory::create()->text();
+        DeckFactory::new()->create(['description' => $description]);
+        DeckFactory::new()->create(['description' => Factory::create()->text()]);
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('GET', '/decks', [
+            'query' => [
+                'description' => $description,
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJsonContains([
+            '@context' => '/contexts/Deck',
+            '@id' => '/decks',
+            '@type' => 'hydra:Collection',
+            'hydra:totalItems' => 1,
+        ]);
+    }
 }

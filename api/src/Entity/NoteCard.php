@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use App\Entity\Trait\IsPublishedTrait;
 use App\Repository\NoteCardRepository;
@@ -25,9 +27,11 @@ class NoteCard
     private ?Uuid $id = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ApiFilter(SearchFilter::class, strategy: 'partial')]
     private ?string $front = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ApiFilter(SearchFilter::class, strategy: 'partial')]
     private ?string $back = null;
 
     #[ORM\ManyToMany(targetEntity: Deck::class, mappedBy: 'cards')]
