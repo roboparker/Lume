@@ -2,7 +2,9 @@
 
 namespace App\Tests\Api;
 
+use ApiPlatform\Api\IriConverterInterface;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
+use App\Factory\DeckFactory;
 use App\Factory\NoteCardFactory;
 use App\Factory\UserFactory;
 use Faker\Factory;
@@ -127,6 +129,65 @@ class NoteCardTest extends ApiTestCase
         ]);
     }
 
+    public function testAddNoteCardToDeck(): void
+    {
+        $iriConverter = self::getContainer()->get('api_platform.iri_converter');
+        \assert($iriConverter instanceof IriConverterInterface);
+
+        $noteCard = NoteCardFactory::new()->create();
+        $deck = DeckFactory::new()->create()->object();
+        $deckIRI = $iriConverter->getIriFromResource($deck);
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('PATCH', '/note_cards/'.$noteCard->getId(), [
+            'json' => [
+                'decks' => [$deckIRI],
+            ],
+            'headers' => [
+                'Content-Type' => 'application/merge-patch+json',
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJsonContains([
+            '@context' => '/contexts/NoteCard',
+            '@type' => 'NoteCard',
+            'front' => $noteCard->getFront(),
+            'back' => $noteCard->getBack(),
+            'isPublished' => $noteCard->getIsPublished(),
+        ]);
+    }
+
+    public function testRemoveNoteCardFromDeck(): void
+    {
+        $deck = DeckFactory::new()->create();
+        $noteCard = $deck->getCards()[0];
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('PUT', '/note_cards/'.$noteCard->getId(), [
+            'json' => [
+                'decks' => [],
+                'front' => $noteCard->getFront(),
+                'back' => $noteCard->getBack(),
+            ],
+            'headers' => [
+                'Content-Type' => 'application/ld+json',
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJsonContains([
+            '@context' => '/contexts/NoteCard',
+            '@type' => 'NoteCard',
+            'front' => $noteCard->getFront(),
+            'back' => $noteCard->getBack(),
+            'isPublished' => $noteCard->getIsPublished(),
+            'decks' => [],
+        ]);
+    }
+
     public function testDeleteNoteCard(): void
     {
         $noteCard = NoteCardFactory::new()->create();
@@ -232,7 +293,7 @@ class NoteCardTest extends ApiTestCase
 
         $client->request('GET', '/note_cards', [
             'query' => [
-                'properties' => ['front']
+                'properties' => ['front'],
             ],
         ]);
 

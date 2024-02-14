@@ -2,8 +2,10 @@
 
 namespace App\Tests\Api;
 
+use ApiPlatform\Api\IriConverterInterface;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Factory\DeckFactory;
+use App\Factory\NoteCardFactory;
 use App\Factory\UserFactory;
 use Faker\Factory;
 use Zenstruck\Foundry\Test\Factories;
@@ -123,6 +125,63 @@ final class DeckTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(204);
     }
 
+    public function testAddCardToDeck(): void
+    {
+        $iriConverter = self::getContainer()->get('api_platform.iri_converter');
+        \assert($iriConverter instanceof IriConverterInterface);
+
+        $deck = DeckFactory::new()->create();
+        $noteCard = NoteCardFactory::new()->create()->object();
+        $noteCardIRI = $iriConverter->getIriFromResource($noteCard);
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('PATCH', '/decks/'.$deck->getId(), [
+            'json' => [
+                'cards' => [
+                    $noteCardIRI,
+                ],
+            ],
+            'headers' => [
+                'Content-Type' => 'application/merge-patch+json',
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJsonContains([
+            '@context' => '/contexts/Deck',
+            '@type' => 'Deck',
+            'cards' => [$noteCardIRI],
+        ]);
+    }
+
+    public function testRemoveCardFromDeck(): void
+    {
+        $deck = DeckFactory::new()->create();
+        $client = static::createClient();
+        $client->loginUser(UserFactory::new()->create()->object());
+
+        $client->request('PUT', '/decks/'.$deck->getId(), [
+            'json' => [
+                'title' => $deck->getTitle(),
+                'description' => $deck->getDescription(),
+                'cards' => [],
+            ],
+            'headers' => [
+                'Content-Type' => 'application/ld+json',
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJsonContains([
+            '@context' => '/contexts/Deck',
+            '@type' => 'Deck',
+            'cards' => [],
+            'title' => $deck->getTitle(),
+            'description' => $deck->getDescription(),
+        ]);
+    }
+
     public function testIsPublishedFilter(): void
     {
         DeckFactory::new()->create(['isPublished' => true]);
@@ -217,7 +276,6 @@ final class DeckTest extends ApiTestCase
             '@type' => 'hydra:Collection',
             'hydra:totalItems' => 1,
         ]);
-
 
         $this->assertArrayNotHasKey('title', $client->getResponse()->toArray(false));
     }
