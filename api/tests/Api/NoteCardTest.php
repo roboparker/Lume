@@ -171,6 +171,7 @@ class NoteCardTest extends ApiTestCase
                 'decks' => [],
                 'front' => $noteCard->getFront(),
                 'back' => $noteCard->getBack(),
+                'isPublished' => $noteCard->getIsPublished(),
             ],
             'headers' => [
                 'Content-Type' => 'application/ld+json',
