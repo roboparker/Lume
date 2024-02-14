@@ -14,6 +14,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: DeckRepository::class)]
 #[ApiResource]
@@ -26,10 +27,13 @@ class Deck
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
+    #[Assert\Uuid]
     private ?Uuid $id = null;
 
     #[ORM\Column(length: 255)]
     #[ApiFilter(SearchFilter::class, strategy: 'partial')]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -37,6 +41,7 @@ class Deck
     private ?string $description = null;
 
     #[ORM\ManyToMany(targetEntity: NoteCard::class, inversedBy: 'decks')]
+    #[Assert\Valid]
     private Collection $cards;
 
     public function __construct()
