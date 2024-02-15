@@ -121,6 +121,8 @@
       <excludeFolder url="file://$MODULE_DIR$/api/vendor/namshi/jose" />
       <excludeFolder url="file://$MODULE_DIR$/api/vendor/behat/mink" />
       <excludeFolder url="file://$MODULE_DIR$/api/vendor/zenstruck/browser" />
+      <excludeFolder url="file://$MODULE_DIR$/api/vendor/doctrine/data-fixtures" />
+      <excludeFolder url="file://$MODULE_DIR$/api/vendor/doctrine/doctrine-fixtures-bundle" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
