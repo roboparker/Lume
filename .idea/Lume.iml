@@ -119,6 +119,8 @@
       <excludeFolder url="file://$MODULE_DIR$/api/vendor/lcobucci/clock" />
       <excludeFolder url="file://$MODULE_DIR$/api/vendor/lexik/jwt-authentication-bundle" />
       <excludeFolder url="file://$MODULE_DIR$/api/vendor/namshi/jose" />
+      <excludeFolder url="file://$MODULE_DIR$/api/vendor/behat/mink" />
+      <excludeFolder url="file://$MODULE_DIR$/api/vendor/zenstruck/browser" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
