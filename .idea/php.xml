@@ -135,6 +135,7 @@
       <path value="$PROJECT_DIR$/api/vendor/zenstruck/browser" />
       <path value="$PROJECT_DIR$/api/vendor/doctrine/data-fixtures" />
       <path value="$PROJECT_DIR$/api/vendor/doctrine/doctrine-fixtures-bundle" />
+      <path value="$PROJECT_DIR$/api/vendor/mtdowling/jmespath.php" />
     </include_path>
   </component>
   <component name="PhpInterpreters">
