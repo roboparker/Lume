@@ -2,7 +2,6 @@
 
 namespace App\Tests\Api;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Factory\UserFactory;
 use Faker\Factory;
 use Zenstruck\Foundry\Test\Factories;
@@ -17,21 +16,16 @@ class UserTest extends ApiTestCase
     {
         $email = Factory::create()->email();
 
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
+        $browser = $this->browser()
+            ->post('/users', [
+                'json' => [
+                    'email' => $email,
+                    'plainPassword' => Factory::create()->password(),
+                ],
+            ]);
 
-        $client->request('POST', '/users', [
-            'json' => [
-                'email' => $email,
-                'plainPassword' => Factory::create()->password(),
-            ],
-            'headers' => [
-                'Content-Type' => 'application/ld+json',
-            ],
-        ]);
-
-        $this->assertResponseStatusCodeSame(201);
-        $this->assertJsonContains([
+        $browser->assertStatus(201);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/User',
             '@type' => 'User',
             'email' => $email,
@@ -42,13 +36,11 @@ class UserTest extends ApiTestCase
     {
         $user = UserFactory::new()->create();
 
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
+        $browser = $this->browser()
+            ->get('/users/'.$user->getId());
 
-        $client->request('GET', '/users/'.$user->getId());
-
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/User',
             '@type' => 'User',
             'email' => $user->getEmail(),
@@ -63,21 +55,16 @@ class UserTest extends ApiTestCase
 
         $this->assertFalse($user->getEmail() === $updatedEmail);
 
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
+        $browser = $this->browser()
+            ->put('/users/'.$user->getId(), [
+                'json' => [
+                    'email' => $updatedEmail,
+                    'plainPassword' => $updatedPassword,
+                ],
+            ]);
 
-        $client->request('PUT', '/users/'.$user->getId(), [
-            'json' => [
-                'email' => $updatedEmail,
-                'plainPassword' => $updatedPassword,
-            ],
-            'headers' => [
-                'Content-Type' => 'application/ld+json',
-            ],
-        ]);
-
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/User',
             '@type' => 'User',
             'email' => $updatedEmail,
@@ -91,20 +78,18 @@ class UserTest extends ApiTestCase
 
         $this->assertFalse($user->getEmail() === $updatedEmail);
 
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
+        $browser = $this->browser()
+            ->patch('/users/'.$user->getId(), [
+                'json' => [
+                    'email' => $updatedEmail,
+                ],
+                'headers' => [
+                    'Content-Type' => 'application/merge-patch+json',
+                ],
+            ]);
 
-        $client->request('PATCH', '/users/'.$user->getId(), [
-            'json' => [
-                'email' => $updatedEmail,
-            ],
-            'headers' => [
-                'Content-Type' => 'application/merge-patch+json',
-            ],
-        ]);
-
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/User',
             '@type' => 'User',
             'email' => $updatedEmail,
@@ -114,22 +99,21 @@ class UserTest extends ApiTestCase
     public function testDeleteUser(): void
     {
         $user = UserFactory::new()->create();
+        $id = $user->getId();
 
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
+        $browser = $this->browser()
+            ->delete('/users/'. $id);
+        $browser->assertStatus(204);
 
-        $client->request('DELETE', '/users/'.$user->getId());
-
-        $this->assertResponseStatusCodeSame(204);
+        $browser = $this->browser()
+            ->get('/users/'. $id);
+        $browser->assertStatus(404);
     }
 
     public function testNotFound(): void
     {
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
-
-        $client->request('GET', '/users/1');
-
-        $this->assertResponseStatusCodeSame(404);
+        $browser = $this->browser()
+            ->get('/users/1');
+        $browser->assertStatus(404);
     }
 }
