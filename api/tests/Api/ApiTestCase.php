@@ -11,7 +11,7 @@ use Zenstruck\Browser\Test\HasBrowser;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
-class ApiTestCase extends KernelTestCase
+abstract class ApiTestCase extends KernelTestCase
 {
     use Factories;
     use HasBrowser {
