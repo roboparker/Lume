@@ -102,11 +102,11 @@ class UserTest extends ApiTestCase
         $id = $user->getId();
 
         $browser = $this->browser()
-            ->delete('/users/'. $id);
+            ->delete('/users/'.$id);
         $browser->assertStatus(204);
 
         $browser = $this->browser()
-            ->get('/users/'. $id);
+            ->get('/users/'.$id);
         $browser->assertStatus(404);
     }
 
