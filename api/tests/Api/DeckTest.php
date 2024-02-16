@@ -3,40 +3,29 @@
 namespace App\Tests\Api;
 
 use ApiPlatform\Api\IriConverterInterface;
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Factory\DeckFactory;
 use App\Factory\NoteCardFactory;
-use App\Factory\UserFactory;
 use Faker\Factory;
-use Zenstruck\Foundry\Test\Factories;
-use Zenstruck\Foundry\Test\ResetDatabase;
 
 final class DeckTest extends ApiTestCase
 {
-    use Factories;
-    use ResetDatabase;
-
     public function testCreateDeck(): void
     {
         $title = Factory::create()->text(255);
         $description = Factory::create()->text();
         $isPublished = true;
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('POST', '/decks', [
-            'json' => [
-                'title' => $title,
-                'description' => $description,
-                'isPublished' => $isPublished,
-            ],
-            'headers' => [
-                'Content-Type' => 'application/ld+json',
-            ],
-        ]);
+        $browser = $this->browser()
+            ->post('/decks', [
+                'json' => [
+                    'title' => $title,
+                    'description' => $description,
+                    'isPublished' => $isPublished,
+                ],
+            ]);
 
-        $this->assertResponseStatusCodeSame(201);
-        $this->assertJsonContains([
+        $browser->assertStatus(201);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/Deck',
             '@type' => 'Deck',
             'title' => $title,
@@ -48,13 +37,12 @@ final class DeckTest extends ApiTestCase
     public function testReadDeck(): void
     {
         $deck = DeckFactory::new()->create();
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('GET', '/decks/'.$deck->getId());
+        $browser = $this->browser()
+            ->get('/decks/'.$deck->getId());
 
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/Deck',
             '@type' => 'Deck',
             'title' => $deck->getTitle(),
@@ -66,22 +54,18 @@ final class DeckTest extends ApiTestCase
     public function testUpdateDeck(): void
     {
         $deck = DeckFactory::new()->create();
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('PUT', '/decks/'.$deck->getId(), [
-            'json' => [
-                'title' => $title = Factory::create()->text(255),
-                'description' => $description = Factory::create()->text(),
-                'isPublished' => $isPublished = !$deck->getIsPublished(),
-            ],
-            'headers' => [
-                'Content-Type' => 'application/ld+json',
-            ],
-        ]);
+        $browser = $this->browser()
+            ->put('/decks/'.$deck->getId(), [
+                'json' => [
+                    'title' => $title = Factory::create()->text(255),
+                    'description' => $description = Factory::create()->text(),
+                    'isPublished' => $isPublished = !$deck->getIsPublished(),
+                ],
+            ]);
 
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/Deck',
             '@type' => 'Deck',
             'title' => $title,
@@ -93,20 +77,19 @@ final class DeckTest extends ApiTestCase
     public function testUpdateDeckPartially(): void
     {
         $deck = DeckFactory::new()->create();
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('PATCH', '/decks/'.$deck->getId(), [
-            'json' => [
-                'title' => $title = Factory::create()->text(255),
-            ],
-            'headers' => [
-                'Content-Type' => 'application/merge-patch+json',
-            ],
-        ]);
+        $browser = $this->browser()
+            ->patch('/decks/'.$deck->getId(), [
+                'json' => [
+                    'title' => $title = Factory::create()->text(255),
+                ],
+                'headers' => [
+                    'Content-Type' => 'application/merge-patch+json',
+                ],
+            ]);
 
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/Deck',
             '@type' => 'Deck',
             'title' => $title,
@@ -117,12 +100,17 @@ final class DeckTest extends ApiTestCase
     public function testDeleteDeck(): void
     {
         $deck = DeckFactory::new()->create();
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
+        $id = $deck->getId();
 
-        $client->request('DELETE', '/decks/'.$deck->getId());
+        $browser = $this->browser()
+            ->delete('/decks/'.$id);
 
-        $this->assertResponseStatusCodeSame(204);
+        $browser->assertStatus(204);
+
+        $browser = $this->browser()
+            ->get('/decks/'.$id);
+
+        $browser->assertStatus(404);
     }
 
     public function testAddCardToDeck(): void
@@ -133,22 +121,21 @@ final class DeckTest extends ApiTestCase
         $deck = DeckFactory::new()->create();
         $noteCard = NoteCardFactory::new()->create()->object();
         $noteCardIRI = $iriConverter->getIriFromResource($noteCard);
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('PATCH', '/decks/'.$deck->getId(), [
-            'json' => [
-                'cards' => [
-                    $noteCardIRI,
+        $browser = $this->browser()
+            ->patch('/decks/'.$deck->getId(), [
+                'json' => [
+                    'cards' => [
+                        $noteCardIRI,
+                    ],
                 ],
-            ],
-            'headers' => [
-                'Content-Type' => 'application/merge-patch+json',
-            ],
-        ]);
+                'headers' => [
+                    'Content-Type' => 'application/merge-patch+json',
+                ],
+            ]);
 
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/Deck',
             '@type' => 'Deck',
             'cards' => [$noteCardIRI],
@@ -158,22 +145,18 @@ final class DeckTest extends ApiTestCase
     public function testRemoveCardFromDeck(): void
     {
         $deck = DeckFactory::new()->create();
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('PUT', '/decks/'.$deck->getId(), [
-            'json' => [
-                'title' => $deck->getTitle(),
-                'description' => $deck->getDescription(),
-                'cards' => [],
-            ],
-            'headers' => [
-                'Content-Type' => 'application/ld+json',
-            ],
-        ]);
+        $browser = $this->browser()
+            ->put('/decks/'.$deck->getId(), [
+                'json' => [
+                    'title' => $deck->getTitle(),
+                    'description' => $deck->getDescription(),
+                    'cards' => [],
+                ],
+            ]);
 
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/Deck',
             '@type' => 'Deck',
             'cards' => [],
@@ -186,21 +169,25 @@ final class DeckTest extends ApiTestCase
     {
         DeckFactory::new()->create(['isPublished' => true]);
         DeckFactory::new()->create(['isPublished' => false]);
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('GET', '/decks', [
-            'query' => [
-                'isPublished' => true,
-            ],
-        ]);
+        $browser = $this->browser()
+            ->get('/decks', [
+                'query' => [
+                    'isPublished' => true,
+                ],
+            ]);
 
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/Deck',
             '@id' => '/decks',
             '@type' => 'hydra:Collection',
             'hydra:totalItems' => 1,
+            'hydra:member' => [
+                [
+                    'isPublished' => true,
+                ],
+            ],
         ]);
     }
 
@@ -209,21 +196,25 @@ final class DeckTest extends ApiTestCase
         $title = Factory::create()->text(255);
         DeckFactory::new()->create(['title' => $title]);
         DeckFactory::new()->create(['title' => Factory::create()->text(255)]);
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('GET', '/decks', [
-            'query' => [
-                'title' => $title,
-            ],
-        ]);
+        $browser = $this->browser()
+            ->get('/decks', [
+                'query' => [
+                    'title' => $title,
+                ],
+            ]);
 
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/Deck',
             '@id' => '/decks',
             '@type' => 'hydra:Collection',
             'hydra:totalItems' => 1,
+            'hydra:member' => [
+                [
+                    'title' => $title,
+                ],
+            ],
         ]);
     }
 
@@ -232,21 +223,25 @@ final class DeckTest extends ApiTestCase
         $description = Factory::create()->text();
         DeckFactory::new()->create(['description' => $description]);
         DeckFactory::new()->create(['description' => Factory::create()->text()]);
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('GET', '/decks', [
-            'query' => [
-                'description' => $description,
-            ],
-        ]);
+        $browser = $this->browser()
+            ->get('/decks', [
+                'query' => [
+                    'description' => $description,
+                ],
+            ]);
 
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/Deck',
             '@id' => '/decks',
             '@type' => 'hydra:Collection',
             'hydra:totalItems' => 1,
+            'hydra:member' => [
+                [
+                    'description' => $description,
+                ],
+            ],
         ]);
     }
 
@@ -260,23 +255,17 @@ final class DeckTest extends ApiTestCase
             'description' => $description,
             'isPublished' => $isPublished,
         ]);
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('GET', '/decks', [
-            'query' => [
-                'properties' => ['title'],
-            ],
-        ]);
+        $browser = $this->browser()
+            ->get('/decks', [
+                'query' => [
+                    'properties' => ['title'],
+                ],
+            ]);
 
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
-            '@context' => '/contexts/Deck',
-            '@id' => '/decks',
-            '@type' => 'hydra:Collection',
-            'hydra:totalItems' => 1,
-        ]);
-
-        $this->assertArrayNotHasKey('title', $client->getResponse()->toArray(false));
+        $browser->assertStatus(200);
+        $browser->json()
+            ->assertMatches('"hydra:member"[0].title', $title)
+            ->assertMissing('"hydra:member"[0].description');
     }
 }
