@@ -3,10 +3,8 @@
 namespace App\Tests\Api;
 
 use ApiPlatform\Api\IriConverterInterface;
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Factory\DeckFactory;
 use App\Factory\NoteCardFactory;
-use App\Factory\UserFactory;
 use Faker\Factory;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
@@ -21,22 +19,18 @@ class NoteCardTest extends ApiTestCase
         $front = Factory::create()->sentence();
         $back = Factory::create()->sentence();
         $isPublished = true;
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('POST', '/note_cards', [
-            'json' => [
-                'front' => $front,
-                'back' => $back,
-                'isPublished' => $isPublished,
-            ],
-            'headers' => [
-                'Content-Type' => 'application/ld+json',
-            ],
-        ]);
+        $browser = $this->browser()
+            ->post('/note_cards', [
+                'json' => [
+                    'front' => $front,
+                    'back' => $back,
+                    'isPublished' => $isPublished,
+                ],
+            ]);
 
-        $this->assertResponseStatusCodeSame(201);
-        $this->assertJsonContains([
+        $browser->assertStatus(201);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/NoteCard',
             '@type' => 'NoteCard',
             'front' => $front,
@@ -48,13 +42,12 @@ class NoteCardTest extends ApiTestCase
     public function testReadNoteCard(): void
     {
         $noteCard = NoteCardFactory::new()->create();
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('GET', '/note_cards/'.$noteCard->getId());
+        $browser = $this->browser()
+            ->get('/note_cards/'.$noteCard->getId());
 
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/NoteCard',
             '@type' => 'NoteCard',
             'front' => $noteCard->getFront(),
@@ -74,22 +67,17 @@ class NoteCardTest extends ApiTestCase
         $this->assertFalse($noteCard->getBack() === $updatedBackValue);
         $this->assertFalse($noteCard->getIsPublished() === $updatedIsPublished);
 
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
+        $browser = $this->browser()
+            ->put('/note_cards/'.$noteCard->getId(), [
+                'json' => [
+                    'front' => $updatedFrontValue,
+                    'back' => $updatedBackValue,
+                    'isPublished' => $updatedIsPublished,
+                ],
+            ]);
 
-        $client->request('PUT', '/note_cards/'.$noteCard->getId(), [
-            'json' => [
-                'front' => $updatedFrontValue,
-                'back' => $updatedBackValue,
-                'isPublished' => $updatedIsPublished,
-            ],
-            'headers' => [
-                'Content-Type' => 'application/ld+json',
-            ],
-        ]);
-
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/NoteCard',
             '@type' => 'NoteCard',
             'front' => $updatedFrontValue,
@@ -107,20 +95,18 @@ class NoteCardTest extends ApiTestCase
 
         $this->assertFalse($noteCard->getFront() === $updatedFrontValue);
 
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
+        $browser = $this->browser()
+            ->patch('/note_cards/'.$noteCard->getId(), [
+                'json' => [
+                    'front' => $updatedFrontValue,
+                ],
+                'headers' => [
+                    'Content-Type' => 'application/merge-patch+json',
+                ],
+            ]);
 
-        $client->request('PATCH', '/note_cards/'.$noteCard->getId(), [
-            'json' => [
-                'front' => $updatedFrontValue,
-            ],
-            'headers' => [
-                'Content-Type' => 'application/merge-patch+json',
-            ],
-        ]);
-
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/NoteCard',
             '@type' => 'NoteCard',
             'front' => $updatedFrontValue,
@@ -137,20 +123,19 @@ class NoteCardTest extends ApiTestCase
         $noteCard = NoteCardFactory::new()->create();
         $deck = DeckFactory::new()->create()->object();
         $deckIRI = $iriConverter->getIriFromResource($deck);
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('PATCH', '/note_cards/'.$noteCard->getId(), [
-            'json' => [
-                'decks' => [$deckIRI],
-            ],
-            'headers' => [
-                'Content-Type' => 'application/merge-patch+json',
-            ],
-        ]);
+        $browser = $this->browser()
+            ->patch('/note_cards/'.$noteCard->getId(), [
+                'json' => [
+                    'decks' => [$deckIRI],
+                ],
+                'headers' => [
+                    'Content-Type' => 'application/merge-patch+json',
+                ],
+            ]);
 
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/NoteCard',
             '@type' => 'NoteCard',
             'front' => $noteCard->getFront(),
@@ -163,23 +148,19 @@ class NoteCardTest extends ApiTestCase
     {
         $deck = DeckFactory::new()->create();
         $noteCard = $deck->getCards()[0];
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('PUT', '/note_cards/'.$noteCard->getId(), [
-            'json' => [
-                'decks' => [],
-                'front' => $noteCard->getFront(),
-                'back' => $noteCard->getBack(),
-                'isPublished' => $noteCard->getIsPublished(),
-            ],
-            'headers' => [
-                'Content-Type' => 'application/ld+json',
-            ],
-        ]);
+        $browser = $this->browser()
+            ->patch('/note_cards/'.$noteCard->getId(), [
+                'json' => [
+                    'decks' => [],
+                ],
+                'headers' => [
+                    'Content-Type' => 'application/merge-patch+json',
+                ],
+            ]);
 
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/NoteCard',
             '@type' => 'NoteCard',
             'front' => $noteCard->getFront(),
@@ -194,49 +175,46 @@ class NoteCardTest extends ApiTestCase
         $noteCard = NoteCardFactory::new()->create();
         $id = $noteCard->getId();
 
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
+        $browser = $this->browser()
+            ->delete('/note_cards/'.$id);
+        $browser->assertStatus(204);
 
-        $client->request('DELETE', '/note_cards/'.$id);
-
-        $this->assertResponseStatusCodeSame(204);
-
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
-
-        $client->request('GET', '/note_cards/'.$id);
-
-        $this->assertResponseStatusCodeSame(404);
+        $browser = $this->browser()
+            ->get('/note_cards/'.$id);
+        $browser->assertStatus(404);
     }
 
     public function testNotFoundNoteCard(): void
     {
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
+        $browser = $this->browser()
+            ->get('/note_cards/1');
 
-        $client->request('GET', '/note_cards/1');
-
-        $this->assertResponseStatusCodeSame(404);
+        $browser->assertStatus(404);
     }
 
     public function testIsPublishedFilter(): void
     {
         NoteCardFactory::new()->create(['isPublished' => true]);
         NoteCardFactory::new()->create(['isPublished' => false]);
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('GET', '/note_cards', [
-            'query' => [
-                'isPublished' => true,
-            ],
-        ]);
+        $browser = $this->browser()
+            ->get('/note_cards', [
+                'query' => [
+                    'isPublished' => true,
+                ],
+            ]);
 
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/NoteCard',
             '@type' => 'hydra:Collection',
             'hydra:totalItems' => 1,
+            'hydra:member' => [
+                [
+                    '@type' => 'NoteCard',
+                    'isPublished' => true,
+                ],
+            ],
         ]);
     }
 
@@ -245,20 +223,25 @@ class NoteCardTest extends ApiTestCase
         $front = Factory::create()->text(255);
         NoteCardFactory::new()->create(['front' => $front]);
         NoteCardFactory::new()->create(['front' => Factory::create()->text(255)]);
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('GET', '/note_cards', [
-            'query' => [
-                'front' => $front,
-            ],
-        ]);
+        $browser = $this->browser()
+            ->get('/note_cards', [
+                'query' => [
+                    'front' => $front,
+                ],
+            ]);
 
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/NoteCard',
             '@type' => 'hydra:Collection',
             'hydra:totalItems' => 1,
+            'hydra:member' => [
+                [
+                    '@type' => 'NoteCard',
+                    'front' => $front,
+                ],
+            ],
         ]);
     }
 
@@ -267,20 +250,24 @@ class NoteCardTest extends ApiTestCase
         $back = Factory::create()->text();
         NoteCardFactory::new()->create(['back' => $back]);
         NoteCardFactory::new()->create(['back' => Factory::create()->text()]);
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
+        $browser = $this->browser()
+            ->get('/note_cards', [
+                'query' => [
+                    'back' => $back,
+                ],
+            ]);
 
-        $client->request('GET', '/note_cards', [
-            'query' => [
-                'back' => $back,
-            ],
-        ]);
-
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
+        $browser->assertStatus(200);
+        $browser->json()->hasSubset([
             '@context' => '/contexts/NoteCard',
             '@type' => 'hydra:Collection',
             'hydra:totalItems' => 1,
+            'hydra:member' => [
+                [
+                    '@type' => 'NoteCard',
+                    'back' => $back,
+                ],
+            ],
         ]);
     }
 
@@ -289,26 +276,26 @@ class NoteCardTest extends ApiTestCase
         $front = Factory::create()->text(255);
         $back = Factory::create()->text();
         NoteCardFactory::new()->create(['front' => $front, 'back' => $back]);
-        $client = static::createClient();
-        $client->loginUser(UserFactory::new()->create()->object());
 
-        $client->request('GET', '/note_cards', [
-            'query' => [
-                'properties' => ['front'],
-            ],
-        ]);
-
-        $this->assertResponseStatusCodeSame(200);
-        $this->assertJsonContains([
-            '@context' => '/contexts/NoteCard',
-            '@type' => 'hydra:Collection',
-            'hydra:totalItems' => 1,
-            'hydra:member' => [
-                [
-                    'front' => $front,
+        $browser = $this->browser()
+            ->get('/note_cards', [
+                'query' => [
+                    'properties' => ['front'],
                 ],
-            ],
-        ]);
-        $this->assertArrayNotHasKey('back', $client->getResponse()->toArray(false));
+            ]);
+
+        $browser->assertStatus(200);
+        $browser->json()
+            ->hasSubset([
+                '@context' => '/contexts/NoteCard',
+                '@type' => 'hydra:Collection',
+                'hydra:totalItems' => 1,
+                'hydra:member' => [
+                    [
+                        'front' => $front,
+                    ],
+                ],
+            ])
+            ->assertMissing('"hydra:member"[0].back');
     }
 }
