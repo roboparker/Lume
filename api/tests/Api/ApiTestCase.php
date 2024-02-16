@@ -19,14 +19,14 @@ class ApiTestCase extends KernelTestCase
     }
     use ResetDatabase;
 
-    protected function browser(array $options = [], array $server = [], false|null|User $user = null): KernelBrowser
+    protected function browser(array $options = [], array $server = [], false|User|null $user = null): KernelBrowser
     {
         $kernelBrowser = $this->baseKernelBrowser()
             ->setDefaultHttpOptions(
                 HttpOptions::create()->withHeader('Accept', 'application/ld+json')
             );
 
-        if(false !== $user) {
+        if (false !== $user) {
             $kernelBrowser->actingAs($user ?? UserFactory::new()->create()->object());
         }
 
