@@ -17,7 +17,7 @@ class ApiTestCase extends KernelTestCase
     }
     use ResetDatabase;
 
-    protected function browser(): KernelBrowser
+    protected function browser(array $options = [], array $server = []): KernelBrowser
     {
         return $this->baseKernelBrowser()
             ->setDefaultHttpOptions(
