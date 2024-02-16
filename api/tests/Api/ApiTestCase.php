@@ -2,6 +2,8 @@
 
 namespace App\Tests\Api;
 
+use App\Entity\User;
+use App\Factory\UserFactory;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Zenstruck\Browser\HttpOptions;
 use Zenstruck\Browser\KernelBrowser;
@@ -17,11 +19,17 @@ class ApiTestCase extends KernelTestCase
     }
     use ResetDatabase;
 
-    protected function browser(array $options = [], array $server = []): KernelBrowser
+    protected function browser(array $options = [], array $server = [], false|null|User $user = null): KernelBrowser
     {
-        return $this->baseKernelBrowser()
+        $kernelBrowser = $this->baseKernelBrowser()
             ->setDefaultHttpOptions(
                 HttpOptions::create()->withHeader('Accept', 'application/ld+json')
             );
+
+        if(false !== $user) {
+            $kernelBrowser->actingAs($user ?? UserFactory::new()->create()->object());
+        }
+
+        return $kernelBrowser;
     }
 }
