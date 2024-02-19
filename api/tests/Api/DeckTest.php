@@ -107,7 +107,7 @@ final class DeckTest extends ApiTestCase
         $deck = DeckFactory::new()->create();
         $id = $deck->getId();
 
-        $browser = $this->browser()
+        $browser = $this->browser(user:  $deck->getOwnedBy())
             ->delete('/decks/'.$id);
 
         $browser->assertStatus(204);
@@ -127,7 +127,7 @@ final class DeckTest extends ApiTestCase
         $noteCard = NoteCardFactory::new()->create()->object();
         $noteCardIRI = $iriConverter->getIriFromResource($noteCard);
 
-        $browser = $this->browser()
+        $browser = $this->browser(user: $deck->getOwnedBy())
             ->patch('/decks/'.$deck->getId(), [
                 'json' => [
                     'cards' => [
@@ -151,12 +151,13 @@ final class DeckTest extends ApiTestCase
     {
         $deck = DeckFactory::new()->create();
 
-        $browser = $this->browser()
+        $browser = $this->browser(user: $user = $deck->getOwnedBy())
             ->put('/decks/'.$deck->getId(), [
                 'json' => [
                     'title' => $deck->getTitle(),
                     'description' => $deck->getDescription(),
                     'cards' => [],
+                    'ownedBy' => sprintf('/users/%s', $user->getId()),
                 ],
             ]);
 

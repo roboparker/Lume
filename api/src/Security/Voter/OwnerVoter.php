@@ -2,6 +2,7 @@
 
 namespace App\Security\Voter;
 
+use App\Entity\User;
 use App\Security\Entity\OwnedByInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -23,8 +24,9 @@ class OwnerVoter extends Voter
             return false;
         }
 
+        \assert($currentUser instanceof User);
         \assert($subject instanceof OwnedByInterface);
 
-        return $subject->getOwnedBy() === $currentUser;
+        return (string) $subject->getOwnedBy()->getId() === (string) $currentUser->getId();
     }
 }
