@@ -5,6 +5,7 @@ namespace App\Tests\Api;
 use ApiPlatform\Api\IriConverterInterface;
 use App\Factory\DeckFactory;
 use App\Factory\NoteCardFactory;
+use App\Factory\UserFactory;
 use Faker\Factory;
 
 final class DeckTest extends ApiTestCase
@@ -15,12 +16,13 @@ final class DeckTest extends ApiTestCase
         $description = Factory::create()->text();
         $isPublished = true;
 
-        $browser = $this->browser()
+        $browser = $this->browser(user: $user = UserFactory::new()->create()->object())
             ->post('/decks', [
                 'json' => [
                     'title' => $title,
                     'description' => $description,
                     'isPublished' => $isPublished,
+                    'ownedBy' => sprintf('/users/%s', $user->getId()),
                 ],
             ]);
 
@@ -55,12 +57,13 @@ final class DeckTest extends ApiTestCase
     {
         $deck = DeckFactory::new()->create();
 
-        $browser = $this->browser()
+        $browser = $this->browser(user: $user = $deck->getOwnedBy())
             ->put('/decks/'.$deck->getId(), [
                 'json' => [
                     'title' => $title = Factory::create()->text(255),
                     'description' => $description = Factory::create()->text(),
                     'isPublished' => $isPublished = !$deck->getIsPublished(),
+                    'ownedBy' => sprintf('/users/%s', $user->getId()),
                 ],
             ]);
 
@@ -78,7 +81,7 @@ final class DeckTest extends ApiTestCase
     {
         $deck = DeckFactory::new()->create();
 
-        $browser = $this->browser()
+        $browser = $this->browser(user: $user = $deck->getOwnedBy())
             ->patch('/decks/'.$deck->getId(), [
                 'json' => [
                     'title' => $title = Factory::create()->text(255),
@@ -94,6 +97,8 @@ final class DeckTest extends ApiTestCase
             '@type' => 'Deck',
             'title' => $title,
             'description' => $deck->getDescription(),
+            'isPublished' => $deck->getIsPublished(),
+            'ownedBy' => sprintf('/users/%s', $user->getId()),
         ]);
     }
 

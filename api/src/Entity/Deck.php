@@ -5,9 +5,16 @@ namespace App\Entity;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use ApiPlatform\Serializer\Filter\PropertyFilter;
 use App\Entity\Trait\IsPublishedTrait;
 use App\Repository\DeckRepository;
+use App\Security\Entity\OwnedByInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -17,9 +24,18 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: DeckRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Delete(security: 'is_granted("DELETE", object)'),
+        new Get(),
+        new GetCollection(),
+        new Patch(security: 'is_granted("PATCH", object)'),
+        new Post(),
+        new Put(security: 'is_granted("PUT", object)'),
+    ]
+)]
 #[ApiFilter(PropertyFilter::class)]
-class Deck
+class Deck implements OwnedByInterface
 {
     use IsPublishedTrait;
 
@@ -29,6 +45,11 @@ class Deck
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     #[Assert\Uuid]
     private ?Uuid $id = null;
+
+    #[Assert\Valid]
+    #[ORM\ManyToOne(inversedBy: 'decks')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $ownedBy = null;
 
     #[ORM\Column(length: 255)]
     #[ApiFilter(SearchFilter::class, strategy: 'partial')]
@@ -52,6 +73,18 @@ class Deck
     public function getId(): ?Uuid
     {
         return $this->id;
+    }
+
+    public function getOwnedBy(): ?User
+    {
+        return $this->ownedBy;
+    }
+
+    public function setOwnedBy(?User $ownedBy): static
+    {
+        $this->ownedBy = $ownedBy;
+
+        return $this;
     }
 
     public function getTitle(): ?string

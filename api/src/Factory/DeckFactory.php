@@ -47,6 +47,7 @@ final class DeckFactory extends ModelFactory
             'description' => self::faker()->text(),
             'isPublished' => self::faker()->boolean(),
             'cards' => NoteCardFactory::new()->many(5),
+            'ownedBy' => UserFactory::new(),
         ];
     }
 
