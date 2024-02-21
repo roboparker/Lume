@@ -68,9 +68,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'ownedBy', targetEntity: Deck::class)]
     private Collection $decks;
 
+    #[ORM\OneToMany(mappedBy: 'ownedBy', targetEntity: NoteCard::class)]
+    private Collection $noteCards;
+
     public function __construct()
     {
         $this->decks = new ArrayCollection();
+        $this->noteCards = new ArrayCollection();
     }
 
     public function getId(): ?Uuid
@@ -178,6 +182,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($deck->getOwnedBy() === $this) {
                 $deck->setOwnedBy(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, NoteCard>
+     */
+    public function getNoteCards(): Collection
+    {
+        return $this->noteCards;
+    }
+
+    public function addNoteCard(NoteCard $noteCard): static
+    {
+        if (!$this->noteCards->contains($noteCard)) {
+            $this->noteCards->add($noteCard);
+            $noteCard->setOwnedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNoteCard(NoteCard $noteCard): static
+    {
+        if ($this->noteCards->removeElement($noteCard)) {
+            // set the owning side to null (unless already changed)
+            if ($noteCard->getOwnedBy() === $this) {
+                $noteCard->setOwnedBy(null);
             }
         }
 

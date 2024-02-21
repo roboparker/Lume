@@ -5,6 +5,7 @@ namespace App\Tests\Api;
 use ApiPlatform\Api\IriConverterInterface;
 use App\Factory\DeckFactory;
 use App\Factory\NoteCardFactory;
+use App\Factory\UserFactory;
 use Faker\Factory;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
@@ -20,12 +21,13 @@ class NoteCardTest extends ApiTestCase
         $back = Factory::create()->sentence();
         $isPublished = true;
 
-        $browser = $this->browser()
+        $browser = $this->browser(user: $user = UserFactory::new()->create()->object())
             ->post('/note_cards', [
                 'json' => [
                     'front' => $front,
                     'back' => $back,
                     'isPublished' => $isPublished,
+                    'ownedBy' => sprintf('/users/%s', $user->getId()),
                 ],
             ]);
 
@@ -36,6 +38,7 @@ class NoteCardTest extends ApiTestCase
             'front' => $front,
             'back' => $back,
             'isPublished' => $isPublished,
+            'ownedBy' => sprintf('/users/%s', $user->getId()),
         ]);
     }
 
@@ -53,6 +56,7 @@ class NoteCardTest extends ApiTestCase
             'front' => $noteCard->getFront(),
             'back' => $noteCard->getBack(),
             'isPublished' => $noteCard->getIsPublished(),
+            'ownedBy' => '/users/'.$noteCard->getOwnedBy()->getId(),
         ]);
     }
 
@@ -67,12 +71,13 @@ class NoteCardTest extends ApiTestCase
         $this->assertFalse($noteCard->getBack() === $updatedBackValue);
         $this->assertFalse($noteCard->getIsPublished() === $updatedIsPublished);
 
-        $browser = $this->browser()
+        $browser = $this->browser(user: $user = $noteCard->getOwnedBy())
             ->put('/note_cards/'.$noteCard->getId(), [
                 'json' => [
                     'front' => $updatedFrontValue,
                     'back' => $updatedBackValue,
                     'isPublished' => $updatedIsPublished,
+                    'ownedBy' => sprintf('/users/%s', $user->getId()),
                 ],
             ]);
 
@@ -83,6 +88,7 @@ class NoteCardTest extends ApiTestCase
             'front' => $updatedFrontValue,
             'back' => $updatedBackValue,
             'isPublished' => $updatedIsPublished,
+            'ownedBy' => sprintf('/users/%s', $user->getId()),
         ]);
     }
 
@@ -95,7 +101,7 @@ class NoteCardTest extends ApiTestCase
 
         $this->assertFalse($noteCard->getFront() === $updatedFrontValue);
 
-        $browser = $this->browser()
+        $browser = $this->browser(user: $user = $noteCard->getOwnedBy())
             ->patch('/note_cards/'.$noteCard->getId(), [
                 'json' => [
                     'front' => $updatedFrontValue,
@@ -112,6 +118,7 @@ class NoteCardTest extends ApiTestCase
             'front' => $updatedFrontValue,
             'back' => $previousBackValue,
             'isPublished' => $previousIsPublished,
+            'ownedBy' => sprintf('/users/%s', $user->getId()),
         ]);
     }
 
@@ -124,7 +131,7 @@ class NoteCardTest extends ApiTestCase
         $deck = DeckFactory::new()->create()->object();
         $deckIRI = $iriConverter->getIriFromResource($deck);
 
-        $browser = $this->browser()
+        $browser = $this->browser(user: $user = $noteCard->getOwnedBy())
             ->patch('/note_cards/'.$noteCard->getId(), [
                 'json' => [
                     'decks' => [$deckIRI],
@@ -141,6 +148,7 @@ class NoteCardTest extends ApiTestCase
             'front' => $noteCard->getFront(),
             'back' => $noteCard->getBack(),
             'isPublished' => $noteCard->getIsPublished(),
+            'ownedBy' => sprintf('/users/%s', $user->getId()),
         ]);
     }
 
@@ -149,7 +157,7 @@ class NoteCardTest extends ApiTestCase
         $deck = DeckFactory::new()->create();
         $noteCard = $deck->getCards()[0];
 
-        $browser = $this->browser()
+        $browser = $this->browser(user: $user = $noteCard->getOwnedBy())
             ->patch('/note_cards/'.$noteCard->getId(), [
                 'json' => [
                     'decks' => [],
@@ -166,6 +174,7 @@ class NoteCardTest extends ApiTestCase
             'front' => $noteCard->getFront(),
             'back' => $noteCard->getBack(),
             'isPublished' => $noteCard->getIsPublished(),
+            'ownedBy' => sprintf('/users/%s', $user->getId()),
             'decks' => [],
         ]);
     }
@@ -175,11 +184,11 @@ class NoteCardTest extends ApiTestCase
         $noteCard = NoteCardFactory::new()->create();
         $id = $noteCard->getId();
 
-        $browser = $this->browser()
+        $browser = $this->browser(user: $user = $noteCard->getOwnedBy())
             ->delete('/note_cards/'.$id);
         $browser->assertStatus(204);
 
-        $browser = $this->browser()
+        $browser = $this->browser(user: $user)
             ->get('/note_cards/'.$id);
         $browser->assertStatus(404);
     }
@@ -194,10 +203,11 @@ class NoteCardTest extends ApiTestCase
 
     public function testIsPublishedFilter(): void
     {
-        NoteCardFactory::new()->create(['isPublished' => true]);
-        NoteCardFactory::new()->create(['isPublished' => false]);
+        $user = UserFactory::new()->create()->object();
+        NoteCardFactory::new()->create(['isPublished' => true, 'ownedBy' => $user]);
+        NoteCardFactory::new()->create(['isPublished' => false, 'ownedBy' => $user]);
 
-        $browser = $this->browser()
+        $browser = $this->browser(user: $user)
             ->get('/note_cards', [
                 'query' => [
                     'isPublished' => true,
@@ -220,14 +230,14 @@ class NoteCardTest extends ApiTestCase
 
     public function testFrontFilter(): void
     {
-        $front = Factory::create()->text(255);
-        NoteCardFactory::new()->create(['front' => $front]);
-        NoteCardFactory::new()->create(['front' => Factory::create()->text(255)]);
+        $user = UserFactory::new()->create()->object();
+        $filteredCard = NoteCardFactory::new()->create(['ownedBy' => $user]);
+        NoteCardFactory::new()->create(['ownedBy' => $user]);
 
         $browser = $this->browser()
             ->get('/note_cards', [
                 'query' => [
-                    'front' => $front,
+                    'front' => $filteredCard->getFront(),
                 ],
             ]);
 
@@ -239,7 +249,7 @@ class NoteCardTest extends ApiTestCase
             'hydra:member' => [
                 [
                     '@type' => 'NoteCard',
-                    'front' => $front,
+                    'front' => $filteredCard->getFront(),
                 ],
             ],
         ]);
@@ -247,13 +257,13 @@ class NoteCardTest extends ApiTestCase
 
     public function testBackFilter(): void
     {
-        $back = Factory::create()->text();
-        NoteCardFactory::new()->create(['back' => $back]);
-        NoteCardFactory::new()->create(['back' => Factory::create()->text()]);
+        $user = UserFactory::new()->create()->object();
+        $filteredCard = NoteCardFactory::new()->create(['ownedBy' => $user]);
+        NoteCardFactory::new()->create(['ownedBy' => $user]);
         $browser = $this->browser()
             ->get('/note_cards', [
                 'query' => [
-                    'back' => $back,
+                    'back' => $filteredCard->getBack(),
                 ],
             ]);
 
@@ -265,7 +275,7 @@ class NoteCardTest extends ApiTestCase
             'hydra:member' => [
                 [
                     '@type' => 'NoteCard',
-                    'back' => $back,
+                    'back' => $filteredCard->getBack(),
                 ],
             ],
         ]);
@@ -273,11 +283,9 @@ class NoteCardTest extends ApiTestCase
 
     public function testPropertyFilter(): void
     {
-        $front = Factory::create()->text(255);
-        $back = Factory::create()->text();
-        NoteCardFactory::new()->create(['front' => $front, 'back' => $back]);
+        $card = NoteCardFactory::new()->create();
 
-        $browser = $this->browser()
+        $browser = $this->browser(user: $user = $card->getOwnedBy())
             ->get('/note_cards', [
                 'query' => [
                     'properties' => ['front'],
@@ -292,7 +300,7 @@ class NoteCardTest extends ApiTestCase
                 'hydra:totalItems' => 1,
                 'hydra:member' => [
                     [
-                        'front' => $front,
+                        'front' => $card->getFront(),
                     ],
                 ],
             ])

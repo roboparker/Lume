@@ -50,6 +50,7 @@ final class NoteCardFactory extends ModelFactory
             'front' => self::faker()->text(),
             'back' => self::faker()->text(),
             'isPublished' => self::faker()->boolean(),
+            'ownedBy' => UserFactory::new(),
         ];
     }
 
