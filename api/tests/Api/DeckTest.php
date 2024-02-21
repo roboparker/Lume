@@ -33,6 +33,7 @@ final class DeckTest extends ApiTestCase
             'title' => $title,
             'description' => $description,
             'isPublished' => $isPublished,
+            'ownedBy' => sprintf('/users/%s', $user->getId()),
         ]);
     }
 
@@ -50,6 +51,7 @@ final class DeckTest extends ApiTestCase
             'title' => $deck->getTitle(),
             'description' => $deck->getDescription(),
             'isPublished' => $deck->getIsPublished(),
+            'ownedBy' => sprintf('/users/%s', $deck->getOwnedBy()->getId()),
         ]);
     }
 
