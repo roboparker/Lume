@@ -107,7 +107,7 @@ final class DeckTest extends ApiTestCase
         $deck = DeckFactory::new()->create();
         $id = $deck->getId();
 
-        $browser = $this->browser(user:  $deck->getOwnedBy())
+        $browser = $this->browser(user: $deck->getOwnedBy())
             ->delete('/decks/'.$id);
 
         $browser->assertStatus(204);
